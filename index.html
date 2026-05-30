@@ -503,199 +503,137 @@ tr:hover td { background: #f8faff; }
 </footer>
 
 <script type="module">
-import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBMXNupah38LZbK6j3Fd6p62mRv5AmIyFA",
-  authDomain: "capacitacion-ia-unah.firebaseapp.com",
-  databaseURL: "https://capacitacion-ia-unah-default-rtdb.firebaseio.com",
-  projectId: "capacitacion-ia-unah",
-  storageBucket: "capacitacion-ia-unah.firebasestorage.app",
-  messagingSenderId: "179041428089",
-  appId: "1:179041428089:web:0d6391a50ef72277c7aaa8"
-};
 
 const CAPS = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
 const SESS = ['','Lunes Sem. 1','Martes Sem. 1','Miércoles Sem. 1','Jueves Sem. 1','Lunes Sem. 2','Martes Sem. 2','Miércoles Sem. 2','Jueves Sem. 2'];
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+function sanitize(s){ return String(s).replace(/[.#$\[\]\/]/g,'_'); }
 
-onValue(ref(db,'.info/connected'), snap => {
-  const ok = snap.val()===true;
-  document.getElementById('conn-dot').className = 'dot'+(ok?' ok':'');
-  document.getElementById('conn-txt').textContent = ok ? 'En línea' : 'Reconectando...';
-});
+function toast(id,msg,tipo){
+  const el=document.getElementById(id);
+  el.textContent=msg; el.className='toast '+tipo; el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},3500);
+}
 
-onValue(ref(db,'docentes'), snap => {
-  window._docentes = snap.val() || {};
-  window.renderAdmin();
-});
-
-onValue(ref(db,'asistencia'), snap => {
-  window._asistencia = snap.val() || {};
-  const s = document.getElementById('sess-sel')?.value || '1';
-  window.renderAttLog(s);
-  window.renderAdmin();
-});
-
-window._db   = db;
-window._ref  = ref;
-window._set  = set;
-window._get  = get;
-window._CAPS = CAPS;
-window._SESS = SESS;
-
-window.registrar = async function() {
-  const emp      = document.getElementById('r-emp').value.trim();
-  const nombre   = document.getElementById('r-nombre').value.trim();
-  const email    = document.getElementById('r-email').value.trim();
-  const facultad = document.getElementById('r-facultad').value;
-  const carrera  = document.getElementById('r-carrera').value.trim();
-  if(!emp||!nombre||!email||!facultad||!carrera){
-    toast('toast-reg','Complete todos los campos obligatorios.','err'); return;
+function renderAttLog(sess){
+  const att=(window._asistencia||{})['sess-'+sess]||{};
+  const list=Object.values(att);
+  const badge=document.getElementById('att-badge');
+  if(badge) badge.textContent=list.length;
+  const el=document.getElementById('att-list');
+  if(!el) return;
+  if(list.length===0){
+    el.innerHTML='<div class="log-empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Sin registros para esta sesión aún.</div>';
+    return;
   }
-  const empKey = emp.replace(/[.#$\[\]\/]/g, '_');
-  try {
-    const snap = await window._get(window._ref(db, 'docentes/' + empKey));
-    if(snap.exists()){ toast('toast-reg','Este número de empleado ya está registrado.','err'); return; }
-    await window._set(window._ref(db, 'docentes/' + empKey), {
-      emp, nombre, email, facultad, carrera,
-      fecha: new Date().toLocaleDateString('es-HN')
-    });
-    ['r-emp','r-nombre','r-email','r-carrera'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('r-facultad').value='';
-    toast('toast-reg','✓ Registro exitoso. ¡Bienvenido/a al programa!','ok');
-  } catch(e) {
-    toast('toast-reg','Error al guardar. Verifique su conexión a internet.','err');
-  }
-};
+  el.innerHTML=list.map(a=>`<div class="log-item"><span class="log-name"><span class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>${a.nombre}</span><div class="log-meta"><div class="log-time">${a.hora}</div><div class="log-cap">${a.capacitacion||''}</div></div></div>`).join('');
+}
 
-window.marcarManual = async function() {
-  const emp  = document.getElementById('mark-emp').value.trim();
-  const sess = document.getElementById('sess-sel').value;
-  const cap  = document.getElementById('cap-sel').value;
-  if(!emp){ alert('Ingrese un número de empleado.'); return; }
+function renderAdmin(){
+  const docentes=window._docentes||{};
+  const asistencia=window._asistencia||{};
+  const dList=Object.values(docentes);
+  let total=0; Object.values(asistencia).forEach(s=>{total+=Object.keys(s).length;});
+  const sc=document.getElementById('stats-cards');
+  if(sc) sc.innerHTML=`<div class="stat-card"><div class="stat-num">${dList.length}</div><div class="stat-lbl">Registrados</div></div><div class="stat-card"><div class="stat-num">${Object.keys(asistencia).length}</div><div class="stat-lbl">Sesiones activas</div></div><div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Asistencias totales</div></div>`;
+  const tbody=document.getElementById('admin-tbody');
+  if(!tbody) return;
+  if(dList.length===0){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7a99">Sin docentes registrados aún.</td></tr>';return;}
+  tbody.innerHTML=dList.map(d=>{
+    const k=sanitize(d.emp);
+    const ses=Object.values(asistencia).filter(s=>s[k]).length;
+    return `<tr><td>${d.emp}</td><td title="${d.nombre}">${d.nombre}</td><td title="${d.carrera}">${d.carrera}</td><td><span class="${ses>0?'pill-ok':'pill-no'}">${ses}/8</span></td></tr>`;
+  }).join('');
+}
 
-  const CAPS_LOCAL = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
-  const capNombre  = (window._CAPS || CAPS_LOCAL)[parseInt(cap)];
-  const empKey     = emp.replace(/[.#$\[\]\/]/g, '_');
+let qrInst=null;
+function updateQR(){
+  const sess=document.getElementById('sess-sel').value;
+  const cap=document.getElementById('cap-sel').value;
+  document.getElementById('qr-sess-lbl').textContent='Sesión '+sess+' — '+SESS[parseInt(sess)];
+  document.getElementById('qr-cap-lbl').textContent=CAPS[parseInt(cap)];
+  const url=window.location.href.split('?')[0]+'?sesion='+sess+'&cap='+cap;
+  const container=document.getElementById('qr-canvas');
+  container.innerHTML='';
+  try{qrInst=new QRCode(container,{text:url,width:200,height:200,colorDark:'#1a56db',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+  renderAttLog(sess);
+}
 
-  try {
-    const dSnap = await window._get(window._ref(db, 'docentes/' + empKey));
-    if(!dSnap.exists()){
-      alert('Empleado no encontrado. Verifique que el número esté registrado correctamente.');
-      return;
-    }
-    const docente = dSnap.val();
-    const aSnap = await window._get(window._ref(db, 'asistencia/sess-' + sess + '/' + empKey));
-    if(aSnap.exists()){
-      alert('Este docente ya tiene asistencia registrada para esta sesión.');
-      return;
-    }
-    await window._set(window._ref(db, 'asistencia/sess-' + sess + '/' + empKey), {
-      nombre: docente.nombre,
-      capacitacion: capNombre,
-      hora: new Date().toLocaleTimeString('es-HN', {hour:'2-digit', minute:'2-digit'})
-    });
-    document.getElementById('mark-emp').value = '';
-  } catch(e) {
-    alert('Error: ' + e.message);
-  }
-};
-</script>
-
-<script>
-const CAPS_FB = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
-const SESS_FB = ['','Lunes Sem. 1','Martes Sem. 1','Miércoles Sem. 1','Jueves Sem. 1','Lunes Sem. 2','Martes Sem. 2','Miércoles Sem. 2','Jueves Sem. 2'];
-let qrInst = null;
-
-function showPanel(id, btn) {
+window.showPanel=function(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   if(btn) btn.classList.add('active');
   if(id==='asistencia') updateQR();
   if(id==='admin') renderAdmin();
-}
-
-function toast(id, msg, tipo) {
-  const el = document.getElementById(id);
-  el.textContent = msg; el.className='toast '+tipo; el.style.display='block';
-  setTimeout(()=>{ el.style.display='none'; },3500);
-}
-
-function updateQR() {
-  const sess = document.getElementById('sess-sel').value;
-  const cap  = document.getElementById('cap-sel').value;
-  const CAPS = window._CAPS || CAPS_FB;
-  const SESS = window._SESS || SESS_FB;
-  document.getElementById('qr-sess-lbl').textContent = `Sesión ${sess} — ${SESS[parseInt(sess)]}`;
-  document.getElementById('qr-cap-lbl').textContent  = CAPS[parseInt(cap)];
-  const url = `https://capacitacion-ia-unah-default-rtdb.firebaseio.com/asistencia/sess-${sess}.json`;
-  const container = document.getElementById('qr-canvas');
-  container.innerHTML = '';
-  try {
-    qrInst = new QRCode(container,{text:url,width:200,height:200,colorDark:'#1a56db',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-  } catch(e){}
-  renderAttLog(sess);
-}
-
-window.renderAttLog = function(sess) {
-  const att  = (window._asistencia||{})['sess-'+sess] || {};
-  const list = Object.values(att);
-  const badge = document.getElementById('att-badge');
-  if(badge) badge.textContent = list.length;
-  const el = document.getElementById('att-list');
-  if(!el) return;
-  if(list.length===0){
-    el.innerHTML=`<div class="log-empty">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      Sin registros para esta sesión aún.
-    </div>`; return;
-  }
-  el.innerHTML = list.map(a=>`
-    <div class="log-item">
-      <span class="log-name">
-        <span class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        ${a.nombre}
-      </span>
-      <div class="log-meta">
-        <div class="log-time">${a.hora}</div>
-        <div class="log-cap">${a.capacitacion||''}</div>
-      </div>
-    </div>`).join('');
 };
 
-window.renderAdmin = function() {
-  const docentes   = window._docentes   || {};
-  const asistencia = window._asistencia || {};
-  const dList = Object.values(docentes);
-  let totalAtt = 0;
-  Object.values(asistencia).forEach(s=>{ totalAtt += Object.keys(s).length; });
-  const sc = document.getElementById('stats-cards');
-  if(sc) sc.innerHTML=`
-    <div class="stat-card"><div class="stat-num">${dList.length}</div><div class="stat-lbl">Registrados</div></div>
-    <div class="stat-card"><div class="stat-num">${Object.keys(asistencia).length}</div><div class="stat-lbl">Sesiones activas</div></div>
-    <div class="stat-card"><div class="stat-num">${totalAtt}</div><div class="stat-lbl">Asistencias totales</div></div>`;
-  const tbody = document.getElementById('admin-tbody');
-  if(!tbody) return;
-  if(dList.length===0){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7a99">Sin docentes registrados aún.</td></tr>'; return;
-  }
-  tbody.innerHTML = dList.map(d=>{
-    const sesiones = Object.values(asistencia).filter(s=>s[d.emp]).length;
-    return `<tr>
-      <td>${d.emp}</td>
-      <td title="${d.nombre}">${d.nombre}</td>
-      <td title="${d.carrera}">${d.carrera}</td>
-      <td><span class="${sesiones>0?'pill-ok':'pill-no'}">${sesiones}/8</span></td>
-    </tr>`;
-  }).join('');
+// Firebase
+const app=initializeApp({
+  apiKey:"AIzaSyBMXNupah38LZbK6j3Fd6p62mRv5AmIyFA",
+  authDomain:"capacitacion-ia-unah.firebaseapp.com",
+  databaseURL:"https://capacitacion-ia-unah-default-rtdb.firebaseio.com",
+  projectId:"capacitacion-ia-unah",
+  storageBucket:"capacitacion-ia-unah.firebasestorage.app",
+  messagingSenderId:"179041428089",
+  appId:"1:179041428089:web:0d6391a50ef72277c7aaa8"
+});
+const db=getDatabase(app);
+
+onValue(ref(db,'.info/connected'),snap=>{
+  const ok=snap.val()===true;
+  document.getElementById('conn-dot').className='dot'+(ok?' ok':'');
+  document.getElementById('conn-txt').textContent=ok?'En línea':'Reconectando...';
+});
+onValue(ref(db,'docentes'),snap=>{window._docentes=snap.val()||{};renderAdmin();});
+onValue(ref(db,'asistencia'),snap=>{
+  window._asistencia=snap.val()||{};
+  renderAttLog(document.getElementById('sess-sel')?.value||'1');
+  renderAdmin();
+});
+
+window.registrar=async function(){
+  const emp=document.getElementById('r-emp').value.trim();
+  const nombre=document.getElementById('r-nombre').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const facultad=document.getElementById('r-facultad').value;
+  const carrera=document.getElementById('r-carrera').value.trim();
+  if(!emp||!nombre||!email||!facultad||!carrera){toast('toast-reg','Complete todos los campos obligatorios.','err');return;}
+  const k=sanitize(emp);
+  try{
+    const snap=await get(ref(db,'docentes/'+k));
+    if(snap.exists()){toast('toast-reg','Este número de empleado ya está registrado.','err');return;}
+    await set(ref(db,'docentes/'+k),{emp,nombre,email,facultad,carrera,fecha:new Date().toLocaleDateString('es-HN')});
+    ['r-emp','r-nombre','r-email','r-carrera'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('r-facultad').value='';
+    toast('toast-reg','✓ Registro exitoso. ¡Bienvenido/a al programa!','ok');
+  }catch(e){toast('toast-reg','Error: '+(e.code||e.message||'desconocido'),'err');}
 };
 
-setTimeout(()=>{ updateQR(); renderAdmin(); }, 800);
+window.marcarManual=async function(){
+  const emp=document.getElementById('mark-emp').value.trim();
+  const sess=document.getElementById('sess-sel').value;
+  const cap=document.getElementById('cap-sel').value;
+  if(!emp){alert('Ingrese un número de empleado.');return;}
+  const k=sanitize(emp);
+  try{
+    const dSnap=await get(ref(db,'docentes/'+k));
+    if(!dSnap.exists()){alert('Empleado "'+emp+'" no encontrado. Verifique que esté registrado.');return;}
+    const aSnap=await get(ref(db,'asistencia/sess-'+sess+'/'+k));
+    if(aSnap.exists()){alert('Este docente ya tiene asistencia registrada para esta sesión.');return;}
+    await set(ref(db,'asistencia/sess-'+sess+'/'+k),{
+      nombre:dSnap.val().nombre,
+      capacitacion:CAPS[parseInt(cap)],
+      hora:new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'})
+    });
+    document.getElementById('mark-emp').value='';
+  }catch(e){alert('Error: '+(e.code||e.message||JSON.stringify(e)));}
+};
+
+setTimeout(()=>{updateQR();renderAdmin();},600);
 </script>
 </body>
 </html>
