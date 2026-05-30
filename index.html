@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capacitación IA — Historia UNAH</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --azul: #1a56db;
+  --azul-dark: #1040b0;
+  --azul-soft: #e8f0fe;
+  --azul-mid: #4f7ef7;
+  --verde: #0a7a4b;
+  --verde-soft: #d1fae5;
+  --rojo: #c0392b;
+  --rojo-soft: #fee2e2;
+  --gris-bg: #f4f6fb;
+  --gris-borde: #dde3ef;
+  --gris-texto: #6b7a99;
+  --texto: #111827;
+  --blanco: #ffffff;
+  --radio: 12px;
+  --radio-lg: 18px;
+  --sombra: 0 2px 16px rgba(26,86,219,0.08);
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--gris-bg);
+  color: var(--texto);
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* HEADER */
+.header {
+  background: var(--azul);
+  color: #fff;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(26,86,219,0.25);
+}
+.header-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.header-text h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.header-text p  { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+.fb-dot {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; opacity: 0.9;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #f87171; }
+.dot.ok { background: #4ade80; }
+
+/* NAV TABS */
+.nav-wrap {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--gris-borde);
+  position: sticky;
+  top: 64px;
+  z-index: 99;
+}
+.nav {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+}
+.nav-btn {
+  flex: 1;
+  padding: 13px 8px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--gris-texto);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.nav-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+.nav-btn.active { color: var(--azul); border-bottom-color: var(--azul); }
+.nav-btn:hover:not(.active) { color: var(--texto); background: var(--gris-bg); }
+
+/* MAIN */
+.main { max-width: 700px; margin: 0 auto; padding: 24px 16px 0; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* CARD */
+.card {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--sombra);
+}
+.card-title {
+  font-size: 16px; font-weight: 600; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title svg { width: 18px; height: 18px; stroke: var(--azul); fill: none; stroke-width: 2; stroke-linecap: round; }
+.card-sub { font-size: 13px; color: var(--gris-texto); margin-bottom: 20px; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 12px; font-weight: 500; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
+input, select {
+  padding: 10px 12px;
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--texto);
+  background: var(--blanco);
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--azul-mid);
+  box-shadow: 0 0 0 3px rgba(79,126,247,0.12);
+}
+.btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: var(--radio);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:hover { background: var(--azul-dark); }
+.btn:active { transform: scale(0.98); }
+.btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+/* TOAST */
+.toast {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radio);
+  font-size: 13px;
+  font-weight: 500;
+}
+.toast.ok { background: var(--verde-soft); color: var(--verde); }
+.toast.err { background: var(--rojo-soft); color: var(--rojo); }
+
+/* SELECTS FILA */
+.sel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+
+/* QR BOX */
+.qr-card {
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f7ff 100%);
+  border: 1px solid #c7d7f5;
+  border-radius: var(--radio-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.qr-wrap-inner {
+  background: var(--blanco);
+  padding: 12px;
+  border-radius: var(--radio);
+  border: 1px solid var(--gris-borde);
+  box-shadow: 0 4px 20px rgba(26,86,219,0.12);
+}
+.badge-sess {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 999px;
+  background: var(--azul); color: #fff;
+  letter-spacing: 0.3px;
+}
+.badge-cap {
+  font-size: 12px;
+  padding: 4px 12px; border-radius: 999px;
+  background: var(--blanco); color: var(--azul);
+  border: 1px solid #c7d7f5;
+  font-weight: 500;
+}
+.qr-hint { font-size: 12px; color: var(--gris-texto); text-align: center; line-height: 1.5; }
+
+/* MANUAL ROW */
+.manual-row {
+  display: flex; gap: 8px;
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio-lg);
+  padding: 14px;
+  margin-bottom: 16px;
+  align-items: flex-end;
+  gap: 10px;
+}
+.manual-row .form-group { flex: 1; margin: 0; }
+.manual-row label { margin-bottom: 5px; }
+.btn-sm {
+  padding: 10px 16px;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: var(--radio);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.btn-sm:hover { background: var(--azul-dark); }
+
+/* LOG LIST */
+.log-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.log-title { font-size: 14px; font-weight: 600; }
+.count-pill {
+  font-size: 12px; font-weight: 600;
+  background: var(--azul-soft); color: var(--azul);
+  padding: 3px 10px; border-radius: 999px;
+}
+.log-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  border-radius: var(--radio);
+  background: var(--gris-bg);
+  border: 1px solid var(--gris-borde);
+  margin-bottom: 6px;
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+.log-name { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.check-icon { width: 16px; height: 16px; background: var(--verde-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.check-icon svg { width: 10px; height: 10px; stroke: var(--verde); fill: none; stroke-width: 3; }
+.log-meta { text-align: right; }
+.log-time { font-size: 12px; color: var(--gris-texto); font-family: var(--mono); }
+.log-cap  { font-size: 11px; color: var(--azul); font-weight: 500; margin-top: 1px; }
+.log-empty { text-align: center; padding: 2rem; color: var(--gris-texto); font-size: 13px; }
+.log-empty svg { width: 32px; height: 32px; stroke: var(--gris-borde); fill: none; stroke-width: 1.5; display: block; margin: 0 auto 8px; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: var(--radio);
+  padding: 16px;
+  text-align: center;
+}
+.stat-num { font-size: 28px; font-weight: 600; color: var(--azul); font-family: var(--mono); }
+.stat-lbl { font-size: 11px; color: var(--gris-texto); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+th {
+  text-align: left; padding: 8px 12px;
+  background: var(--gris-bg); color: var(--gris-texto);
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--gris-borde);
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gris-borde);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--texto);
+}
+tr:hover td { background: #f8faff; }
+.pill-ok { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--verde-soft); color: var(--verde); }
+.pill-no { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--gris-bg); color: var(--gris-texto); border: 1px solid var(--gris-borde); }
+
+/* FOOTER */
+.footer {
+  max-width: 700px; margin: 2rem auto 0;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 12px; color: var(--gris-texto);
+}
+
+@media (max-width: 480px) {
+  .form-grid, .sel-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid .stat-card:last-child { grid-column: 1 / -1; }
+  .card { padding: 18px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-icon">🎓</div>
+    <div class="header-text">
+      <h1>Capacitación IA — Carrera de Historia</h1>
+      <p>Dirección Ejecutiva de Gestión de Tecnología · UNAH</p>
+    </div>
+    <div class="fb-dot">
+      <div class="dot" id="conn-dot"></div>
+      <span id="conn-txt">Conectando...</span>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-wrap">
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPanel('registro',this)">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Registro
+    </button>
+    <button class="nav-btn" onclick="showPanel('asistencia',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/><line x1="17" y1="14" x2="17" y2="14"/></svg>
+      Asistencia
+    </button>
+    <button class="nav-btn" onclick="showPanel('admin',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Panel Admin
+    </button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- REGISTRO -->
+  <div id="panel-registro" class="panel active">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Registro de docente
+      </div>
+      <p class="card-sub">Complete este formulario una sola vez para inscribirse al programa.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Número de empleado *</label>
+          <input id="r-emp" type="text" placeholder="Ej. 12345">
+        </div>
+        <div class="form-group">
+          <label>Correo institucional *</label>
+          <input id="r-email" type="email" placeholder="usuario@unah.edu.hn">
+        </div>
+        <div class="form-group full">
+          <label>Nombre completo *</label>
+          <input id="r-nombre" type="text" placeholder="Nombres y apellidos completos">
+        </div>
+        <div class="form-group">
+          <label>Facultad *</label>
+          <select id="r-facultad">
+            <option value="">— Seleccione —</option>
+            <option>Ciencias Sociales</option>
+            <option>Ciencias Jurídicas</option>
+            <option>Humanidades y Artes</option>
+            <option>Ciencias Económicas</option>
+            <option>Ingeniería</option>
+            <option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Carrera *</label>
+          <input id="r-carrera" type="text" placeholder="Ej. Historia">
+        </div>
+      </div>
+      <button class="btn" onclick="registrar()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar registro
+      </button>
+      <div id="toast-reg" class="toast"></div>
+    </div>
+  </div>
+
+  <!-- ASISTENCIA -->
+  <div id="panel-asistencia" class="panel">
+    <div class="card" style="padding-bottom:16px">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Control de asistencia
+      </div>
+      <p class="card-sub">Seleccione la sesión y capacitación activa. El docente escanea el QR con su teléfono.</p>
+      <div class="sel-row">
+        <div class="form-group">
+          <label>Sesión</label>
+          <select id="sess-sel" onchange="updateQR()">
+            <option value="1">Sesión 1 — Lunes Sem. 1</option>
+            <option value="2">Sesión 2 — Martes Sem. 1</option>
+            <option value="3">Sesión 3 — Miércoles Sem. 1</option>
+            <option value="4">Sesión 4 — Jueves Sem. 1</option>
+            <option value="5">Sesión 5 — Lunes Sem. 2</option>
+            <option value="6">Sesión 6 — Martes Sem. 2</option>
+            <option value="7">Sesión 7 — Miércoles Sem. 2</option>
+            <option value="8">Sesión 8 — Jueves Sem. 2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Capacitación</label>
+          <select id="cap-sel" onchange="updateQR()">
+            <option value="1">1. Generalidades</option>
+            <option value="2">2. Prompts</option>
+            <option value="3">3. Imágenes</option>
+            <option value="4">4. Presentaciones</option>
+            <option value="5">5. Investigación</option>
+            <option value="6">6. Aplicaciones varias</option>
+            <option value="7">7. Entrenamiento con IA</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="qr-card">
+      <span class="badge-sess" id="qr-sess-lbl">Sesión 1 — Lunes Sem. 1</span>
+      <span class="badge-cap"  id="qr-cap-lbl">1. Generalidades</span>
+      <div class="qr-wrap-inner">
+        <div id="qr-canvas"></div>
+      </div>
+      <p class="qr-hint">Escanea con la cámara del teléfono<br>para registrar tu asistencia automáticamente.</p>
+    </div>
+
+    <div class="manual-row">
+      <div class="form-group">
+        <label>Marcar manualmente por número de empleado</label>
+        <input id="mark-emp" type="text" placeholder="Ingrese número de empleado">
+      </div>
+      <button class="btn-sm" onclick="marcarManual()">Marcar</button>
+    </div>
+
+    <div class="log-header">
+      <span class="log-title">Asistencias registradas</span>
+      <span class="count-pill" id="att-badge">0</span>
+    </div>
+    <div id="att-list">
+      <div class="log-empty">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Sin registros para esta sesión aún.
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="panel-admin" class="panel">
+    <div class="stats-grid" id="stats-cards">
+      <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Registrados</div></div>
+      <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Sesiones activas</div></div>
+      <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Asistencias totales</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Docentes registrados
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:72px">Empleado</th>
+              <th style="width:200px">Nombre</th>
+              <th style="width:100px">Carrera</th>
+              <th style="width:65px">Ses.</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7a99">Sin docentes registrados aún.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Dirección Ejecutiva de Gestión de Tecnología · Universidad Nacional Autónoma de Honduras</p>
+  <p style="margin-top:4px">Capacitación IA Aplicada a la Historia · 2025</p>
+</footer>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBMXNupah38LZbK6j3Fd6p62mRv5AmIyFA",
+  authDomain: "capacitacion-ia-unah.firebaseapp.com",
+  databaseURL: "https://capacitacion-ia-unah-default-rtdb.firebaseio.com",
+  projectId: "capacitacion-ia-unah",
+  storageBucket: "capacitacion-ia-unah.firebasestorage.app",
+  messagingSenderId: "179041428089",
+  appId: "1:179041428089:web:0d6391a50ef72277c7aaa8"
+};
+
+const CAPS = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
+const SESS = ['','Lunes Sem. 1','Martes Sem. 1','Miércoles Sem. 1','Jueves Sem. 1','Lunes Sem. 2','Martes Sem. 2','Miércoles Sem. 2','Jueves Sem. 2'];
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+onValue(ref(db,'.info/connected'), snap => {
+  const ok = snap.val()===true;
+  document.getElementById('conn-dot').className = 'dot'+(ok?' ok':'');
+  document.getElementById('conn-txt').textContent = ok ? 'En línea' : 'Reconectando...';
+});
+
+onValue(ref(db,'docentes'), snap => {
+  window._docentes = snap.val() || {};
+  window.renderAdmin();
+});
+
+onValue(ref(db,'asistencia'), snap => {
+  window._asistencia = snap.val() || {};
+  const s = document.getElementById('sess-sel')?.value || '1';
+  window.renderAttLog(s);
+  window.renderAdmin();
+});
+
+window._db   = db;
+window._ref  = ref;
+window._set  = set;
+window._get  = get;
+window._CAPS = CAPS;
+window._SESS = SESS;
+
+window.registrar = async function() {
+  const emp      = document.getElementById('r-emp').value.trim();
+  const nombre   = document.getElementById('r-nombre').value.trim();
+  const email    = document.getElementById('r-email').value.trim();
+  const facultad = document.getElementById('r-facultad').value;
+  const carrera  = document.getElementById('r-carrera').value.trim();
+  if(!emp||!nombre||!email||!facultad||!carrera){
+    toast('toast-reg','Complete todos los campos obligatorios.','err'); return;
+  }
+  try {
+    const snap = await window._get(window._ref(db,`docentes/${emp}`));
+    if(snap.exists()){ toast('toast-reg','Este número de empleado ya está registrado.','err'); return; }
+    await window._set(window._ref(db,`docentes/${emp}`),{
+      emp, nombre, email, facultad, carrera,
+      fecha: new Date().toLocaleDateString('es-HN')
+    });
+    ['r-emp','r-nombre','r-email','r-carrera'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('r-facultad').value='';
+    toast('toast-reg','✓ Registro exitoso. ¡Bienvenido/a al programa!','ok');
+  } catch(e) {
+    toast('toast-reg','Error al guardar. Verifique su conexión a internet.','err');
+  }
+};
+
+window.marcarManual = async function() {
+  const emp  = document.getElementById('mark-emp').value.trim();
+  const sess = document.getElementById('sess-sel').value;
+  const cap  = document.getElementById('cap-sel').value;
+  if(!emp) return;
+  try {
+    const dSnap = await window._get(window._ref(db,`docentes/${emp}`));
+    if(!dSnap.exists()){ alert('Número de empleado no encontrado en el registro.'); return; }
+    const aSnap = await window._get(window._ref(db,`asistencia/sess-${sess}/${emp}`));
+    if(aSnap.exists()){ alert('Este docente ya tiene asistencia registrada para esta sesión.'); return; }
+    await window._set(window._ref(db,`asistencia/sess-${sess}/${emp}`),{
+      nombre: dSnap.val().nombre,
+      capacitacion: (window._CAPS)[parseInt(cap)],
+      hora: new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'})
+    });
+    document.getElementById('mark-emp').value='';
+  } catch(e) {
+    alert('Error al registrar asistencia. Verifique su conexión.');
+  }
+};
+</script>
+
+<script>
+const CAPS_FB = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
+const SESS_FB = ['','Lunes Sem. 1','Martes Sem. 1','Miércoles Sem. 1','Jueves Sem. 1','Lunes Sem. 2','Martes Sem. 2','Miércoles Sem. 2','Jueves Sem. 2'];
+let qrInst = null;
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='asistencia') updateQR();
+  if(id==='admin') renderAdmin();
+}
+
+function toast(id, msg, tipo) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className='toast '+tipo; el.style.display='block';
+  setTimeout(()=>{ el.style.display='none'; },3500);
+}
+
+function updateQR() {
+  const sess = document.getElementById('sess-sel').value;
+  const cap  = document.getElementById('cap-sel').value;
+  const CAPS = window._CAPS || CAPS_FB;
+  const SESS = window._SESS || SESS_FB;
+  document.getElementById('qr-sess-lbl').textContent = `Sesión ${sess} — ${SESS[parseInt(sess)]}`;
+  document.getElementById('qr-cap-lbl').textContent  = CAPS[parseInt(cap)];
+  const url = `https://capacitacion-ia-unah-default-rtdb.firebaseio.com/asistencia/sess-${sess}.json`;
+  const container = document.getElementById('qr-canvas');
+  container.innerHTML = '';
+  try {
+    qrInst = new QRCode(container,{text:url,width:200,height:200,colorDark:'#1a56db',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  } catch(e){}
+  renderAttLog(sess);
+}
+
+window.renderAttLog = function(sess) {
+  const att  = (window._asistencia||{})['sess-'+sess] || {};
+  const list = Object.values(att);
+  const badge = document.getElementById('att-badge');
+  if(badge) badge.textContent = list.length;
+  const el = document.getElementById('att-list');
+  if(!el) return;
+  if(list.length===0){
+    el.innerHTML=`<div class="log-empty">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Sin registros para esta sesión aún.
+    </div>`; return;
+  }
+  el.innerHTML = list.map(a=>`
+    <div class="log-item">
+      <span class="log-name">
+        <span class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        ${a.nombre}
+      </span>
+      <div class="log-meta">
+        <div class="log-time">${a.hora}</div>
+        <div class="log-cap">${a.capacitacion||''}</div>
+      </div>
+    </div>`).join('');
+};
+
+window.renderAdmin = function() {
+  const docentes   = window._docentes   || {};
+  const asistencia = window._asistencia || {};
+  const dList = Object.values(docentes);
+  let totalAtt = 0;
+  Object.values(asistencia).forEach(s=>{ totalAtt += Object.keys(s).length; });
+  const sc = document.getElementById('stats-cards');
+  if(sc) sc.innerHTML=`
+    <div class="stat-card"><div class="stat-num">${dList.length}</div><div class="stat-lbl">Registrados</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.keys(asistencia).length}</div><div class="stat-lbl">Sesiones activas</div></div>
+    <div class="stat-card"><div class="stat-num">${totalAtt}</div><div class="stat-lbl">Asistencias totales</div></div>`;
+  const tbody = document.getElementById('admin-tbody');
+  if(!tbody) return;
+  if(dList.length===0){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:2rem;color:#6b7a99">Sin docentes registrados aún.</td></tr>'; return;
+  }
+  tbody.innerHTML = dList.map(d=>{
+    const sesiones = Object.values(asistencia).filter(s=>s[d.emp]).length;
+    return `<tr>
+      <td>${d.emp}</td>
+      <td title="${d.nombre}">${d.nombre}</td>
+      <td title="${d.carrera}">${d.carrera}</td>
+      <td><span class="${sesiones>0?'pill-ok':'pill-no'}">${sesiones}/8</span></td>
+    </tr>`;
+  }).join('');
+};
+
+setTimeout(()=>{ updateQR(); renderAdmin(); }, 800);
+</script>
+</body>
+</html>
