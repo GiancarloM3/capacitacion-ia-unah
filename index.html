@@ -556,10 +556,11 @@ window.registrar = async function() {
   if(!emp||!nombre||!email||!facultad||!carrera){
     toast('toast-reg','Complete todos los campos obligatorios.','err'); return;
   }
+  const empKey = emp.replace(/[.#$\[\]\/]/g, '_');
   try {
-    const snap = await window._get(window._ref(db,`docentes/${emp}`));
+    const snap = await window._get(window._ref(db, 'docentes/' + empKey));
     if(snap.exists()){ toast('toast-reg','Este número de empleado ya está registrado.','err'); return; }
-    await window._set(window._ref(db,`docentes/${emp}`),{
+    await window._set(window._ref(db, 'docentes/' + empKey), {
       emp, nombre, email, facultad, carrera,
       fecha: new Date().toLocaleDateString('es-HN')
     });
@@ -575,20 +576,32 @@ window.marcarManual = async function() {
   const emp  = document.getElementById('mark-emp').value.trim();
   const sess = document.getElementById('sess-sel').value;
   const cap  = document.getElementById('cap-sel').value;
-  if(!emp) return;
+  if(!emp){ alert('Ingrese un número de empleado.'); return; }
+
+  const CAPS_LOCAL = ['','1. Generalidades','2. Prompts','3. Imágenes','4. Presentaciones','5. Investigación','6. Aplicaciones varias','7. Entrenamiento con IA'];
+  const capNombre  = (window._CAPS || CAPS_LOCAL)[parseInt(cap)];
+  const empKey     = emp.replace(/[.#$\[\]\/]/g, '_');
+
   try {
-    const dSnap = await window._get(window._ref(db,`docentes/${emp}`));
-    if(!dSnap.exists()){ alert('Número de empleado no encontrado en el registro.'); return; }
-    const aSnap = await window._get(window._ref(db,`asistencia/sess-${sess}/${emp}`));
-    if(aSnap.exists()){ alert('Este docente ya tiene asistencia registrada para esta sesión.'); return; }
-    await window._set(window._ref(db,`asistencia/sess-${sess}/${emp}`),{
-      nombre: dSnap.val().nombre,
-      capacitacion: (window._CAPS)[parseInt(cap)],
-      hora: new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'})
+    const dSnap = await window._get(window._ref(db, 'docentes/' + empKey));
+    if(!dSnap.exists()){
+      alert('Empleado no encontrado. Verifique que el número esté registrado correctamente.');
+      return;
+    }
+    const docente = dSnap.val();
+    const aSnap = await window._get(window._ref(db, 'asistencia/sess-' + sess + '/' + empKey));
+    if(aSnap.exists()){
+      alert('Este docente ya tiene asistencia registrada para esta sesión.');
+      return;
+    }
+    await window._set(window._ref(db, 'asistencia/sess-' + sess + '/' + empKey), {
+      nombre: docente.nombre,
+      capacitacion: capNombre,
+      hora: new Date().toLocaleTimeString('es-HN', {hour:'2-digit', minute:'2-digit'})
     });
-    document.getElementById('mark-emp').value='';
+    document.getElementById('mark-emp').value = '';
   } catch(e) {
-    alert('Error al registrar asistencia. Verifique su conexión.');
+    alert('Error: ' + e.message);
   }
 };
 </script>
